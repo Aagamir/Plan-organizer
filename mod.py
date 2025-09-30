@@ -162,7 +162,7 @@ class Plan:
                 height=g.end - g.start,
                 bottom=g.start,
                 width=0.6,
-                color=colors.get(g.type, "gray"),
+                color=colors.get(g.type.name, "gray"),
                 edgecolor="black",
                 align="center"
             )
@@ -183,9 +183,47 @@ class Plan:
         ax.set_axisbelow(True)  # słupki będą nad siatką
 
         plt.tight_layout()
+        #plt.show()
+        return fig
+
+    def visualize_all(planner):
+
+        all_students = planner.students
+        n = len(all_students)
+        fig, axes = plt.subplots(n, 1, figsize=(12, 4 * n), sharex=True)
+        if n == 1:
+            axes = [axes]
+
+        day_labels = {1: "Poniedziałek", 2: "Wtorek", 3: "Środa", 4: "Czwartek",
+                      5: "Piątek", 6: "Sobota", 7: "Niedziela"}
+        colors = {"WYK": "skyblue", "LAB": "lightgreen", "KONW": "lightcoral",
+                  "CW": "khaki", "LEK": "plum", "SEM": "orange"}
+        positions = {d: i for i, d in enumerate(day_labels.keys())}
+
+        for ax, student in zip(axes, all_students):
+            for g in student.schedule:
+                x = positions[g.day]
+                ax.bar(
+                    x=x,
+                    height=g.end - g.start,
+                    bottom=g.start,
+                    width=0.6,
+                    color=colors.get(g.type.name, "gray"),
+                    edgecolor="black",
+                    align="center"
+                )
+                ax.text(x, g.start + 0.05, g.name, va="bottom", ha="center", fontsize=8)
+
+            ax.set_ylabel("Godzina")
+            ax.set_ylim(8, 20)
+            ax.set_xticks(list(positions.values()))
+            ax.set_xticklabels([day_labels[d] for d in positions.keys()])
+            ax.set_title(f"Plan studenta {student.index}")
+            ax.grid(True, axis='y', linestyle='--', alpha=0.5)
+            ax.set_axisbelow(True)
+
+        plt.tight_layout()
         plt.show()
-
-
 
     def assign_student_to_subject(self, student, subject):
         """
